@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "723809017529",
+    "project_id": "lister-b324a",
+    "storage_bucket": "lister-b324a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:723809017529:android:932140a92e8223e3684568",
+        "android_client_info": {
+          "package_name": "com.chirag_redij.lister"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmvMu3iJRJPpqIVtNt5FQsGP-ttulml-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
