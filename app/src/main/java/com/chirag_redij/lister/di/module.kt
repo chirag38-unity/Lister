@@ -6,6 +6,8 @@ import com.chirag_redij.lister.presentation.sign_in.GoogleAuthUIClient
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import dagger.Module
 import dagger.Provides
@@ -39,6 +41,12 @@ object module {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
+    }
+
+    @Provides
+    @Singleton
+    fun provideFireStore(): FirebaseFirestore {
+        return Firebase.firestore
     }
 
 }
