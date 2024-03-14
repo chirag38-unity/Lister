@@ -23,16 +23,16 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
-import com.chirag_redij.lister.presentation.lists.ListItem
+import com.chirag_redij.lister.presentation.notes.Note
 import timber.log.Timber
 
 @Composable
 fun ListItemComposable(
-    listItem: ListItem,
+    listItem: Note,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 10.dp,
     cutCournerRadius: Dp = 30.dp,
-    onCheckClicked: (ListItem) -> Unit
+    onCheckClicked: (Note) -> Unit
 ) {
 
     Timber.tag("item").d("item id ->%s", listItem.id)
@@ -41,9 +41,9 @@ fun ListItemComposable(
         Timber.tag("item").d("isDone ->" + listItem.isDone)
     }
 
-    LaunchedEffect(key1 = listItem.timeInMillis) {
-        Timber.tag("item").d("isDone ->" + listItem.timeInMillis)
-    }
+//    LaunchedEffect(key1 = listItem.timeInMillis) {
+//        Timber.tag("item").d("isDone ->" + listItem.timeInMillis)
+//    }
 
     Box(modifier = modifier) {
         Canvas(
@@ -79,7 +79,7 @@ fun ListItemComposable(
                 .padding(end = 32.dp)
         ) {
             Text(
-                text = listItem.title,
+                text = listItem.title ?: "",
                 style = MaterialTheme.typography.headlineSmall.copy(
                     textDecoration = if (listItem.isDone) TextDecoration.LineThrough else null
                 ),

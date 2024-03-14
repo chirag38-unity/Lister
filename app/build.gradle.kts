@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp") version ("1.9.0-1.0.13")
     id("dagger.hilt.android.plugin")
     id("androidx.navigation.safeargs.kotlin")
@@ -11,6 +12,14 @@ plugins {
 android {
     namespace = "com.chirag_redij.lister"
     compileSdk = 34
+
+    val key: String = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir)
+        .getProperty("supabaseKey")
+    val url: String = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir)
+        .getProperty("supabaseUrl")
+    val googleClientId: String = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(
+        rootDir
+    ).getProperty("googleClientId")
 
     defaultConfig {
         applicationId = "com.chirag_redij.lister"
@@ -23,6 +32,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildConfigField("String","supabaseKey","\"$key\"")
+        buildConfigField("String","supabaseUrl","\"$url\"")
+        buildConfigField("String","googleClientId","\"$googleClientId\"")
     }
 
     buildTypes {
@@ -46,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.0"
@@ -67,7 +80,7 @@ android {
 dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation(platform("androidx.compose:compose-bom:2023.10.01"))
     implementation("androidx.compose.ui:ui")
@@ -87,23 +100,32 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Compose Navigation UI
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
-    implementation("androidx.navigation:navigation-compose:2.7.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
     // Compose - Destinations
-    implementation("io.github.raamcosta.compose-destinations:core:1.9.55")
-    ksp("io.github.raamcosta.compose-destinations:ksp:1.9.55")
+    implementation("io.github.raamcosta.compose-destinations:core:1.10.0")
+    ksp("io.github.raamcosta.compose-destinations:ksp:1.10.0")
 
     // Firebase Auth & Firestore
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.firebase:firebase-firestore:24.10.0")
+//    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+//    implementation("com.google.firebase:firebase-firestore:24.10.3")
 
     // Coil & Lottie
     implementation("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("com.google.accompanist:accompanist-coil:0.15.0")
     implementation("com.airbnb.android:lottie-compose:6.2.0")
+
+    // Supabase
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.1.3")
+    implementation("io.github.jan-tennert.supabase:compose-auth:2.1.3")
+    implementation("io.github.jan-tennert.supabase:compose-auth-ui:2.1.3")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.1.3")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.1.3")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.1.3")
+    implementation("io.ktor:ktor-client-cio:2.3.8")
 
     // Serialiser
     implementation("com.google.code.gson:gson:2.10.1")
@@ -113,5 +135,5 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.50")
     ksp("com.google.dagger:hilt-compiler:2.50")
     ksp("com.google.dagger:hilt-android-compiler:2.50")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }

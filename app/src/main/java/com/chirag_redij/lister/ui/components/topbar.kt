@@ -30,12 +30,13 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chirag_redij.lister.R
-import com.google.firebase.auth.FirebaseUser
+import io.github.jan.supabase.gotrue.user.UserInfo
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListerTopBar(
-    userData: FirebaseUser?,
+    userData: UserInfo?,
     onLogoutClick: (DropDownItem) -> Unit
 ) {
 
@@ -43,13 +44,21 @@ fun ListerTopBar(
         mutableStateOf(false)
     }
 
+    Timber.tag("User Metadata").d(userData?.userMetadata.toString())
+    Timber.tag("User Info").d(userData?.toString())
+
+    val userName = userData?.userMetadata?.getValue("name").toString().replace("\"","")
+    val userProfile = userData?.userMetadata?.getValue("avatar_url").toString().replace("\"","")
+
+    Timber.tag("Data").d("%s %s", userName, userProfile)
+
     TopAppBar(
         title = {
-            Text(text = "Hello " + (userData?.displayName ?: "User"))
+            Text(text = "Hello " + (userName ?: "User"))
         },
         actions = {
             AsyncImage(
-                model = userData?.photoUrl ?: R.drawable.person,
+                model = userProfile ?: R.drawable.person,
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(48.dp)

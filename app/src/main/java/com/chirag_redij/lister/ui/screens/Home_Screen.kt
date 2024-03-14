@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,15 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chirag_redij.lister.presentation.lists.ListItem
-import com.chirag_redij.lister.presentation.lists.ListViewModel
-import com.chirag_redij.lister.presentation.sign_in.SignInViewModel
+import com.chirag_redij.lister.presentation.sign_in.UserState
 import com.chirag_redij.lister.ui.components.DropDownItem
 import com.chirag_redij.lister.ui.components.ListItemComposable
 import com.chirag_redij.lister.ui.components.ListerTopBar
-import com.google.firebase.auth.FirebaseUser
+import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import io.github.jan.supabase.gotrue.user.UserInfo
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -46,36 +46,56 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     navigator: DestinationsNavigator,
-    userData: FirebaseUser?,
-    signInViewModel: SignInViewModel = hiltViewModel(),
-    listViewModel: ListViewModel = hiltViewModel()
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val list = listViewModel.listState.collectAsState()
+    val userState = homeScreenViewModel.userState.collectAsState()
+    val list = homeScreenViewModel.notesList.collectAsState()
+
     var openDialog by remember {
         mutableStateOf(false)
     }
 
+    var userInfo by remember {
+        mutableStateOf<UserInfo?>(null)
+    }
+
     val signOutClick: () -> Unit = {
         coroutineScope.launch {
-            signInViewModel.signOut()
-            Toast.makeText(context, "Sign Out Successful", Toast.LENGTH_SHORT).show()
-            navigator.popBackStack()
+            homeScreenViewModel.logout()
         }
     }
+
+    LaunchedEffect(key1 = userState.value) {
+        when (userState.value) {
+            is UserState.Error -> {
+//                Toast.makeText(context, (userState as UserState.Error).message, Toast.LENGTH_SHORT).show()
+            }
+            UserState.LoggedOut -> {
+                Toast.makeText(context, "Sign Out Successful", Toast.LENGTH_SHORT).show()
+                navigator.navigate(SignInScreenDestination)
+            }
+            is UserState.Success -> {
+                userInfo = (userState.value as UserState.Success).user.userId
+                homeScreenViewModel.subscribeNotesList(userInfo?.id)
+            }
+            else -> {}
+        }
+    }
+
+
 
     // Composable-----------------------------------------------------------------------------------
 
     Scaffold(
         topBar = {
-            ListerTopBar(userData = userData) {
+            ListerTopBar(userData = userInfo) {
                 when (it) {
                     DropDownItem.Settings -> {
                         Toast.makeText(context, "Settings Button Clicked", Toast.LENGTH_SHORT)
                             .show()
                     }
-
                     DropDownItem.Logout -> {
                         signOutClick()
                     }
@@ -107,12 +127,12 @@ fun HomeScreen(
                         .combinedClickable(
                             onClick = {},
                             onLongClick = {
-                                listViewModel.deleteItem(ListItem)
+                                homeScreenViewModel.deleteNote(ListItem.id!!)
                             },
                         ),
                     listItem = ListItem
                 ) {
-                    listViewModel.toggleItemState(it)
+                    homeScreenViewModel.updateNote(it.id!!, !it.isDone)
                 }
             }
         }
@@ -132,10 +152,9 @@ fun HomeScreen(
                         if (note.isEmpty()) {
                             isError = true
                         } else {
-                            listViewModel.addNewItem(
-                                ListItem(
-                                    title = note
-                                )
+                            homeScreenViewModel.addNote(
+                                title = note,
+                                userId = userInfo?.id ?: ""
                             )
                             openDialog = false
                         }

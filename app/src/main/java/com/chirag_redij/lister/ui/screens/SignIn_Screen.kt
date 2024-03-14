@@ -1,10 +1,6 @@
 package com.chirag_redij.lister.ui.screens
 
-import android.app.Activity.RESULT_OK
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,19 +30,26 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.chirag_redij.lister.R
-import com.chirag_redij.lister.presentation.sign_in.SignInViewModel
+import com.chirag_redij.lister.di.SupabaseClient.client
+import com.chirag_redij.lister.presentation.sign_in.UserState
 import com.chirag_redij.lister.ui.screens.destinations.HomeScreenDestination
+import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.launch
+import com.ramcosta.composedestinations.navigation.popUpTo
+import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
+import io.github.jan.supabase.compose.auth.composeAuth
+import timber.log.Timber
 
-@Destination(
+@RootNavGraph(
     start = true
 )
+@Destination
 @Composable
 fun SignInScreen(
     navigator: DestinationsNavigator,
-    signInViewModel: SignInViewModel = hiltViewModel(),
+    signInViewModel: SignInScreenViewModel = hiltViewModel(),
 ) {
     // Lottie States -------------------------------------------------------------------------------
     val lottieComposition by rememberLottieComposition(
@@ -59,51 +62,31 @@ fun SignInScreen(
 
     // Auth States ---------------------------------------------------------------------------------
     val context = LocalContext.current
-    val state by signInViewModel.state.collectAsState()
+    val state by signInViewModel.userState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult(),
-        onResult = { result ->
-            if (result.resultCode == RESULT_OK) {
-                coroutineScope.launch {
-                    val signInResult = signInViewModel.signIn(result.data ?: return@launch)
-                    signInViewModel.onSignInResult(signInResult)
-                }
-            }
-        }
+    val action = client.composeAuth.rememberSignInWithGoogle(
+        onResult = { result -> signInViewModel.checkGoogleLoginStatus(result) },
+        fallback = {}
     )
 
-    val onSignInClick: () -> Unit = {
-        coroutineScope.launch {
-            val signInIntentSender = signInViewModel.returnSignInIntent()
-            launcher.launch(
-                IntentSenderRequest.Builder(
-                    signInIntentSender ?: return@launch
-                ).build()
-            )
-        }
-    }
-
     // State listeners------------------------------------------------------------------------------
-    LaunchedEffect(key1 = Unit) {
-        if (signInViewModel.getSignedInUser() != null) {
-            navigator.navigate(HomeScreenDestination(signInViewModel.getSignedInUser()))
-        }
-    }
 
-    LaunchedEffect(key1 = state.isSignInSuccess) {
-        if (state.isSignInSuccess) {
-            Toast.makeText(context, "Sign In Successful", Toast.LENGTH_SHORT).show()
-            navigator.navigate(HomeScreenDestination(signInViewModel.getSignedInUser()))
-            signInViewModel.resetState()
-        }
-
-    }
-
-    LaunchedEffect(key1 = state.signInError) {
-        state.signInError?.let { error ->
-            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(key1 = state) {
+        when (state) {
+            is UserState.Error -> {
+                Toast.makeText(context, (state as UserState.Error).message, Toast.LENGTH_SHORT).show()
+                Timber.tag("LoginError").d((state as UserState.Error).toString())
+            }
+            is UserState.Success -> {
+                Toast.makeText(context, "Sign In Successful", Toast.LENGTH_SHORT).show()
+                navigator.navigate(HomeScreenDestination){
+                    popUpTo(SignInScreenDestination){
+                        inclusive = true
+                    }
+                }
+            }
+            else -> {}
         }
     }
 
@@ -123,7 +106,9 @@ fun SignInScreen(
                 composition = lottieComposition,
                 progress = { progress }
             )
-            OutlinedButton(onClick = onSignInClick) {
+            OutlinedButton(onClick = {
+                action.startFlow()
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.google),
                     contentDescription = "Google Login",
