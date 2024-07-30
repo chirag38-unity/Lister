@@ -15,6 +15,8 @@ object SupabaseClient {
         supabaseUrl = BuildConfig.supabaseUrl
     ) {
         install(Auth){
+            host = "www.lister.com"
+            scheme = "https"
 
         }
         install(ComposeAuth) {

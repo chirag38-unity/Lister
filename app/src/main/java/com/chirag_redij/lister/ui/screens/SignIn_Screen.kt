@@ -40,6 +40,9 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.Github
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @RootNavGraph(
@@ -69,6 +72,12 @@ fun SignInScreen(
         onResult = { result -> signInViewModel.checkGoogleLoginStatus(result) },
         fallback = {}
     )
+
+    val signInWithGithub : () -> Unit = {
+        coroutineScope.launch {
+            client.auth.signInWith(Github)
+        }
+    }
 
     // State listeners------------------------------------------------------------------------------
 
@@ -108,7 +117,8 @@ fun SignInScreen(
                 progress = { progress }
             )
             OutlinedButton(onClick = {
-                action.startFlow()
+//                action.startFlow()
+                signInWithGithub()
             }) {
                 Icon(
                     painter = painterResource(id = R.drawable.google),

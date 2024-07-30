@@ -16,13 +16,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import com.chirag_redij.lister.di.SupabaseClient
+import com.chirag_redij.lister.presentation.sign_in.SignInProvider
 import com.chirag_redij.lister.ui.screens.NavGraphs
 import com.chirag_redij.lister.ui.theme.ListerTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.gotrue.handleDeeplinks
+import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var signInProvider: SignInProvider
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(
@@ -34,6 +43,10 @@ class MainActivity : ComponentActivity() {
         )
 
         super.onCreate(savedInstanceState)
+        Timber.tag("Provider").d("Intent -> " + intent.data)
+        SupabaseClient.client.handleDeeplinks(intent){
+            signInProvider.saveUserSession(it)
+        }
         setContent {
             ListerTheme {
                 // A surface container using the 'background' color from the theme

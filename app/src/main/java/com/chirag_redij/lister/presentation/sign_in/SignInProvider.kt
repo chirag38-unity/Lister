@@ -7,6 +7,7 @@ import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
+import io.github.jan.supabase.gotrue.user.UserSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -87,6 +88,7 @@ class SignInProvider @Inject constructor(
 
     fun getSignedInUser() {
         scope.launch {
+            Timber.tag("Provider").d("Getting User")
             try {
                 val token = getToken()
                 if (token.isNullOrEmpty()) {
@@ -102,10 +104,10 @@ class SignInProvider @Inject constructor(
                         )
                     )
                 }
-            } catch (e: RestException) {
-                Timber.d(e)
+            } catch (e: Exception) {
+                Timber.tag("Provider").d(e)
                 sharedPref.clearPreferences()
-                _state.value = UserState.Error(e.error)
+                _state.value = UserState.Error(e.message)
             }
         }
     }
@@ -120,6 +122,25 @@ class SignInProvider @Inject constructor(
                 _state.value = UserState.Error(e.message ?: "")
             }
         }
+    }
+
+    fun saveUserSession(userSession: UserSession) {
+
+
+        scope.launch {
+
+            Timber.tag("Provider").d("User Logged -> " + userSession.user)
+            Timber.tag("Provider").d("User Token -> " + userSession.accessToken)
+
+            sharedPref.saveStringData("accessToken", userSession.accessToken)
+            _state.emit(UserState.Success(
+                User(
+                    userId = userSession.user
+                )
+            ))
+
+        }
+
     }
 
     // Tokens --------------------------------------------------------------------------------------
