@@ -63,6 +63,7 @@ class SignInProvider @Inject constructor(
                             userId = getToken()?.let { client.auth.retrieveUser(it) }
                         )
                     )
+
                 }
                 is NativeSignInResult.ClosedByUser -> {}
                 is NativeSignInResult.Error -> {
@@ -75,6 +76,12 @@ class SignInProvider @Inject constructor(
                     _state.value = UserState.Error(message)
                 }
             }
+        }
+    }
+
+    fun resetUserState() {
+        scope.launch {
+            _state.emit(UserState.UnAuthenticated)
         }
     }
 

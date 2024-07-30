@@ -41,10 +41,6 @@ fun ListItemComposable(
         Timber.tag("item").d("isDone ->" + listItem.isDone)
     }
 
-//    LaunchedEffect(key1 = listItem.timeInMillis) {
-//        Timber.tag("item").d("isDone ->" + listItem.timeInMillis)
-//    }
-
     Box(modifier = modifier) {
         Canvas(
             modifier = Modifier.matchParentSize(),

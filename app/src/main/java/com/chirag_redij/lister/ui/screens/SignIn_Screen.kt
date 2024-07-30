@@ -77,6 +77,7 @@ fun SignInScreen(
             is UserState.Error -> {
                 Toast.makeText(context, (state as UserState.Error).message, Toast.LENGTH_SHORT).show()
                 Timber.tag("LoginError").d((state as UserState.Error).toString())
+                signInViewModel.resetUserState()
             }
             is UserState.Success -> {
                 Toast.makeText(context, "Sign In Successful", Toast.LENGTH_SHORT).show()

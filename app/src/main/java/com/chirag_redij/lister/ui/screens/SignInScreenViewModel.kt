@@ -27,6 +27,10 @@ class SignInScreenViewModel @Inject constructor(
         }
     }
 
+    fun resetUserState() {
+        signInProvider.resetUserState()
+    }
+
 
 
 }

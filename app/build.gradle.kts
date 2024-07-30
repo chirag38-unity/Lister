@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -13,13 +15,23 @@ android {
     namespace = "com.chirag_redij.lister"
     compileSdk = 34
 
-    val key: String = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir)
-        .getProperty("supabaseKey")
-    val url: String = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir)
-        .getProperty("supabaseUrl")
-    val googleClientId: String = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(
-        rootDir
-    ).getProperty("googleClientId")
+    fun loadLocalProperties(rootDir: File): Properties {
+        val propertiesFile = File(rootDir, "local.properties")
+        val properties = Properties()
+        if (propertiesFile.exists()) {
+            propertiesFile.inputStream().use { inputStream ->
+                properties.load(inputStream)
+            }
+        }
+        return properties
+    }
+
+// Load properties
+    val localProperties = loadLocalProperties(rootDir)
+
+    val key: String = localProperties.getProperty("supabaseKey")
+    val url: String = localProperties.getProperty("supabaseUrl")
+    val googleClientId: String = localProperties.getProperty("googleClientId")
 
     defaultConfig {
         applicationId = "com.chirag_redij.lister"
@@ -79,19 +91,19 @@ android {
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
+    implementation("androidx.activity:activity-compose:1.9.1")
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -109,31 +121,31 @@ dependencies {
 
     // Firebase Auth & Firestore
 //    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
-    implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 //    implementation("com.google.firebase:firebase-firestore:24.10.3")
 
     // Coil & Lottie
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.accompanist:accompanist-coil:0.15.0")
-    implementation("com.airbnb.android:lottie-compose:6.2.0")
+    implementation("com.airbnb.android:lottie-compose:6.4.1")
 
     // Supabase
-    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.1.3")
-    implementation("io.github.jan-tennert.supabase:compose-auth:2.1.3")
-    implementation("io.github.jan-tennert.supabase:compose-auth-ui:2.1.3")
-    implementation("io.github.jan-tennert.supabase:storage-kt:2.1.3")
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.1.3")
-    implementation("io.github.jan-tennert.supabase:realtime-kt:2.1.3")
-    implementation("io.ktor:ktor-client-cio:2.3.8")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.4")
+    implementation("io.github.jan-tennert.supabase:compose-auth:2.5.4")
+    implementation("io.github.jan-tennert.supabase:compose-auth-ui:2.5.4")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.5.4")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.4")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.5.4")
+    implementation("io.ktor:ktor-client-cio:2.3.12")
 
     // Serialiser
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
     // Dagger-Hilt
-    implementation("com.google.dagger:hilt-android:2.50")
-    ksp("com.google.dagger:hilt-compiler:2.50")
-    ksp("com.google.dagger:hilt-android-compiler:2.50")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }
