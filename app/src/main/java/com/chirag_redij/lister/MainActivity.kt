@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         Timber.tag("Provider").d("Intent -> " + intent.data)
+        Timber.tag("Provider").d(intent.data?.getQueryParameter("code"))
+
         SupabaseClient.client.handleDeeplinks(intent){
             signInProvider.saveUserSession(it)
         }

@@ -59,6 +59,7 @@ class SignInProvider @Inject constructor(
             when (result) {
                 is NativeSignInResult.Success -> {
                     saveToken()
+                    client.auth.refreshCurrentSession()
                     _state.value = UserState.Success(
                         User(
                             userId = getToken()?.let { client.auth.retrieveUser(it) }
