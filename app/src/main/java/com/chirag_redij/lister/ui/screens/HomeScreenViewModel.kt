@@ -16,10 +16,12 @@ class HomeScreenViewModel @Inject constructor(
     val notesList = notesClient.notesList
 
     fun logout() {
+        notesClient.unsubscribeNotesList()
         signInProvider.logout()
     }
 
     fun deleteAccount() {
+        notesClient.unsubscribeNotesList()
         signInProvider.deleteAccount()
     }
 

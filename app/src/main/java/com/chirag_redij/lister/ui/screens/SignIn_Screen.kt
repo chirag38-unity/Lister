@@ -1,14 +1,19 @@
 package com.chirag_redij.lister.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -26,7 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -136,42 +147,96 @@ fun SignInScreen(
     Scaffold(
 
     ) { scaffoldPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(scaffoldPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            LottieAnimation(
-                modifier = Modifier,
-                composition = lottieComposition,
-                progress = { progress }
-            )
 
-            AnimatedVisibility(loadingSessionComplete) {
-                OutlinedButton(onClick = {
-                    action.startFlow()
+        Box(modifier = Modifier.fillMaxSize()
+            .padding(scaffoldPadding)) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(scaffoldPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                LottieAnimation(
+                    modifier = Modifier,
+                    composition = lottieComposition,
+                    progress = { progress }
+                )
+
+                AnimatedVisibility(loadingSessionComplete) {
+                    OutlinedButton(onClick = {
+                        action.startFlow()
 //                signInWithGithub()
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.google),
-                        contentDescription = "Google Login",
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(
-                        text = "Login with Google",
-                        color = Color.Black
-                    )
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.google),
+                            contentDescription = "Google Login",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "Login with Google",
+                            color = Color.Black
+                        )
 
+                    }
                 }
+
+
+
             }
 
+            AnimatedVisibility(
+                loadingSessionComplete,
+                modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+            ) {
 
+                val annotatedText = buildAnnotatedString {
+                    append("By using Listerrr, you are agreeing to our ")
+
+                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
+                        pushStringAnnotation(tag = "URL", annotation = "https://sites.google.com/view/listerrr/terms-and-conditions")
+                        append("Terms of Service")
+                        pop()
+                    }
+
+                    append(" and ")
+
+                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
+                        pushStringAnnotation(tag = "URL", annotation = "https://sites.google.com/view/listerrr/privacy-policy")
+                        append("Privacy Policy")
+                        pop()
+                    }
+                }
+
+                ClickableText(
+                    text = annotatedText,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(20.dp),
+                    softWrap = true,
+                    overflow = TextOverflow.Visible,
+                    onClick = { offset ->
+                        annotatedText.getStringAnnotations(
+                            tag = "URL",
+                            start = offset,
+                            end = offset
+                        )
+                            .firstOrNull()?.let { annotation ->
+//                                println("Clicked on: ${annotation.item}")
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
+                                context.startActivity(intent)
+                            }
+                    }
+                )
+
+            }
 
         }
+
+
     }
 
 }

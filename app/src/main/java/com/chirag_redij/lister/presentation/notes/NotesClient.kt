@@ -12,7 +12,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+
 class NotesClient @Inject constructor(
     private val notesRepo: NotesRepo
 ) {
@@ -55,6 +55,10 @@ class NotesClient @Inject constructor(
         status: Boolean
     ) {
         notesRepo.changeNoteStatus(noteId,status)
+    }
+
+    fun unsubscribeNotesList() {
+        notesRepo.unsubscribeNotesList()
     }
 
 }

@@ -30,7 +30,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+
 class NotesRepo @Inject constructor(
 
 ) {
@@ -66,11 +66,17 @@ class NotesRepo @Inject constructor(
             supabaseChannel.subscribe()
 
             result.buffer()
-                .collect{
-                    Timber.tag("initList").d(it.toString())
-                    trySend(it)
-                    send(it)
+                .map { notesList ->
+                    notesList.sortedWith(compareBy<Note> { it.isDone }.thenByDescending { it.createdAt })
                 }
+                .collect{ sortedList ->
+                    Timber.tag("initList").d(sortedList.toString())
+                    trySend(sortedList)
+                }
+
+        } catch (e : Exception) {
+            Timber.d(e)
+        } finally {
 
             awaitClose {
                 scope.launch{
@@ -79,16 +85,15 @@ class NotesRepo @Inject constructor(
                 }
             }
 
-        } catch (e : Exception) {
-            Timber.d(e)
-
-            scope.launch{
-                supabaseChannel.unsubscribe()
-                Timber.tag("initList").d("Channel UnSubscribed")
-            }
-
         }
 
+    }
+
+    fun unsubscribeNotesList() {
+        scope.launch{
+            supabaseChannel.unsubscribe()
+            Timber.tag("initList").d("Channel UnSubscribed")
+        }
     }
 
     fun addNote(
@@ -147,5 +152,7 @@ class NotesRepo @Inject constructor(
             }
         }
     }
+
+
 
 }

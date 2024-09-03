@@ -44,7 +44,8 @@ android {
     val googleClientId: String = localProperties.getProperty("googleClientId")
 
     defaultConfig {
-        applicationId = "com.chirag_redij.lister"
+//        applicationId = "com.chirag_redij.lister"
+        applicationId = "com.mciedusofttech.listerrr"
         minSdk = 29
         targetSdk = 34
         versionCode = 1
@@ -69,6 +70,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
         }
     }

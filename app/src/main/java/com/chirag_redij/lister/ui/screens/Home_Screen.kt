@@ -1,6 +1,7 @@
 package com.chirag_redij.lister.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
@@ -124,8 +125,8 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { openDialog = true },
-                containerColor = Color.Yellow,
-                contentColor = MaterialTheme.colorScheme.onBackground
+                containerColor = Color.Black,
+                contentColor = Color.White
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add note")
             }
@@ -139,10 +140,13 @@ fun HomeScreen(
                 .padding(scaffoldPadding)
                 .padding(16.dp),
         ) {
-            items(list.value) { ListItem ->
+            items(items = list.value, key = { ListItem -> ListItem.id!! }) { ListItem ->
                 ListItemComposable(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
+                        .animateItemPlacement(
+                            animationSpec = tween(durationMillis = 300)
+                        )
                         .combinedClickable(
                             onClick = {},
                             onLongClick = {

@@ -35,12 +35,6 @@ fun ListItemComposable(
     onCheckClicked: (Note) -> Unit
 ) {
 
-    Timber.tag("item").d("item id ->%s", listItem.id)
-
-    LaunchedEffect(key1 = listItem.isDone) {
-        Timber.tag("item").d("isDone ->" + listItem.isDone)
-    }
-
     Box(modifier = modifier) {
         Canvas(
             modifier = Modifier.matchParentSize(),
