@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.chirag_redij.lister" />
-                  <option name="mobileSdkAppId" value="1:723809017529:android:932140a92e8223e3684568" />
-                  <option name="projectId" value="lister-b324a" />
-                  <option name="projectNumber" value="723809017529" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

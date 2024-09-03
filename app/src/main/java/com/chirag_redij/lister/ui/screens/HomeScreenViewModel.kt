@@ -19,6 +19,10 @@ class HomeScreenViewModel @Inject constructor(
         signInProvider.logout()
     }
 
+    fun deleteAccount() {
+        signInProvider.deleteAccount()
+    }
+
     fun subscribeNotesList(userId: String?) {
         notesClient.getNotesList(userId)
     }

@@ -6,6 +6,7 @@ sealed class UserState {
     data object Loading: UserState()
     data object UnAuthenticated : UserState()
     data object LoggedOut : UserState()
+    data object AccountDeleted : UserState()
     data class Success(val user: User): UserState()
     data class Error(val message: String?): UserState()
 }

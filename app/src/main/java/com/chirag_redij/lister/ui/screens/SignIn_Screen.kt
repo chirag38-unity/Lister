@@ -1,6 +1,7 @@
 package com.chirag_redij.lister.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,7 +46,11 @@ import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Github
+import io.github.jan.supabase.gotrue.providers.builtin.Email
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import timber.log.Timber
 
 @RootNavGraph(
@@ -62,6 +70,11 @@ fun SignInScreen(
         composition = lottieComposition,
         iterations = LottieConstants.IterateForever
     )
+    val scope = rememberCoroutineScope()
+
+    var loadingSessionComplete by remember {
+        mutableStateOf(false)
+    }
 
     // Auth States ---------------------------------------------------------------------------------
     val context = LocalContext.current
@@ -76,6 +89,7 @@ fun SignInScreen(
     val signInWithGithub : () -> Unit = {
         coroutineScope.launch {
             client.auth.signInWith(Github)
+
         }
     }
 
@@ -94,6 +108,24 @@ fun SignInScreen(
                     popUpTo(SignInScreenDestination){
                         inclusive = true
                     }
+                }
+            }
+            is UserState.UnAuthenticated -> {
+                scope.launch {
+                    delay(1000)
+                    loadingSessionComplete = true
+                }
+            }
+            UserState.LoggedOut -> {
+                scope.launch {
+                    delay(1000)
+                    loadingSessionComplete = true
+                }
+            }
+            UserState.AccountDeleted -> {
+                scope.launch {
+                    delay(1000)
+                    loadingSessionComplete = true
                 }
             }
             else -> {}
@@ -116,23 +148,28 @@ fun SignInScreen(
                 composition = lottieComposition,
                 progress = { progress }
             )
-            OutlinedButton(onClick = {
-//                action.startFlow()
-                signInWithGithub()
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.google),
-                    contentDescription = "Google Login",
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "Login with Google",
-                    color = Color.Black
-                )
 
+            AnimatedVisibility(loadingSessionComplete) {
+                OutlinedButton(onClick = {
+                    action.startFlow()
+//                signInWithGithub()
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.google),
+                        contentDescription = "Google Login",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = "Login with Google",
+                        color = Color.Black
+                    )
+
+                }
             }
+
+
 
         }
     }

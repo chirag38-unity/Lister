@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
@@ -99,6 +100,6 @@ fun ListerTopBar(
 }
 
 enum class DropDownItem(val title: String, val icon: ImageVector) {
-    Settings("Settings", Icons.Filled.Settings),
+    DeleteAccount("Delete Account", Icons.Filled.AccountBox),
     Logout("Logout", Icons.Filled.Logout)
 }

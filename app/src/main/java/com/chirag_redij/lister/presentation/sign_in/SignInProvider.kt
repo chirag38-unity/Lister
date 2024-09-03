@@ -2,6 +2,7 @@ package com.chirag_redij.lister.presentation.sign_in
 
 import android.content.Context
 import com.chirag_redij.lister.SharedPreferenceHelper
+import com.chirag_redij.lister.di.ServiceClient.serviceClient
 import com.chirag_redij.lister.di.SupabaseClient.client
 import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
 import io.github.jan.supabase.exceptions.RestException
@@ -10,6 +11,7 @@ import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.gotrue.user.UserSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,9 +24,9 @@ class SignInProvider @Inject constructor(
     private val sharedPref: SharedPreferenceHelper,
     private val appContext: Context
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _state = MutableStateFlow<UserState>(UserState.UnAuthenticated)
+    private val _state = MutableStateFlow<UserState>(UserState.Loading)
     val state = _state.asStateFlow()
 
     init {
@@ -60,6 +62,10 @@ class SignInProvider @Inject constructor(
                 is NativeSignInResult.Success -> {
                     saveToken()
                     client.auth.refreshCurrentSession()
+                    val user = client.auth.currentUserOrNull()
+
+
+
                     _state.value = UserState.Success(
                         User(
                             userId = getToken()?.let { client.auth.retrieveUser(it) }
@@ -95,8 +101,13 @@ class SignInProvider @Inject constructor(
                 if (token.isNullOrEmpty()) {
                     _state.value = UserState.UnAuthenticated
                 } else {
-                    client.auth.retrieveUser(token)
+                    val user = client.auth.retrieveUser(token)
                     client.auth.refreshCurrentSession()
+
+                    Timber.tag("USER_ROLE").d("Role -> " + user?.role)
+                    Timber.tag("USER_ROLE").d("AUD -> " + user?.aud)
+                    Timber.tag("USER_ROLE").d("DATA -> " + user?.userMetadata)
+
                     saveToken()
                     _state.value = UserState.Success(
                         User(
@@ -120,7 +131,21 @@ class SignInProvider @Inject constructor(
                 sharedPref.clearPreferences()
                 _state.value = UserState.LoggedOut
             } catch (e: Exception) {
-                _state.value = UserState.Error(e.message ?: "")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun deleteAccount() {
+        scope.launch {
+            try {
+                val user = client.auth.currentUserOrNull()
+//                client.auth.admin.deleteUser(user?.id ?: "")
+                serviceClient.auth.admin.deleteUser(user?.id ?: "")
+                sharedPref.clearPreferences()
+                _state.value = UserState.AccountDeleted
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -157,5 +182,7 @@ class SignInProvider @Inject constructor(
     private fun getToken(): String? {
         return sharedPref.getStringData("accessToken")
     }
+
+
 
 }

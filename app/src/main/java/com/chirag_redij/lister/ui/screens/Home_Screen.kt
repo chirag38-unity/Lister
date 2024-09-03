@@ -35,9 +35,11 @@ import com.chirag_redij.lister.presentation.sign_in.UserState
 import com.chirag_redij.lister.ui.components.DropDownItem
 import com.chirag_redij.lister.ui.components.ListItemComposable
 import com.chirag_redij.lister.ui.components.ListerTopBar
+import com.chirag_redij.lister.ui.screens.destinations.HomeScreenDestination
 import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.popUpTo
 import io.github.jan.supabase.gotrue.user.UserInfo
 import kotlinx.coroutines.launch
 
@@ -61,6 +63,12 @@ fun HomeScreen(
         mutableStateOf<UserInfo?>(null)
     }
 
+    val deleteAccount : () -> Unit = {
+        coroutineScope.launch {
+            homeScreenViewModel.deleteAccount()
+        }
+    }
+
     val signOutClick: () -> Unit = {
         coroutineScope.launch {
             homeScreenViewModel.logout()
@@ -74,7 +82,19 @@ fun HomeScreen(
             }
             UserState.LoggedOut -> {
                 Toast.makeText(context, "Sign Out Successful", Toast.LENGTH_SHORT).show()
-                navigator.navigate(SignInScreenDestination)
+                navigator.navigate(SignInScreenDestination){
+                    popUpTo(HomeScreenDestination){
+                        inclusive = true
+                    }
+                }
+            }
+            UserState.AccountDeleted -> {
+                Toast.makeText(context, "Account Deleted Successfully", Toast.LENGTH_SHORT).show()
+                navigator.navigate(SignInScreenDestination){
+                    popUpTo(HomeScreenDestination){
+                        inclusive = true
+                    }
+                }
             }
             is UserState.Success -> {
                 userInfo = (userState.value as UserState.Success).user.userId
@@ -92,9 +112,8 @@ fun HomeScreen(
         topBar = {
             ListerTopBar(userData = userInfo) {
                 when (it) {
-                    DropDownItem.Settings -> {
-                        Toast.makeText(context, "Settings Button Clicked", Toast.LENGTH_SHORT)
-                            .show()
+                    DropDownItem.DeleteAccount -> {
+                        deleteAccount()
                     }
                     DropDownItem.Logout -> {
                         signOutClick()

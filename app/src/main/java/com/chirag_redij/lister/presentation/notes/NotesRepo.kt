@@ -15,6 +15,7 @@ import io.github.jan.supabase.realtime.postgresListDataFlow
 import io.github.jan.supabase.realtime.realtime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
@@ -34,7 +35,8 @@ class NotesRepo @Inject constructor(
 
 ) {
 
-    val scope = CoroutineScope(Dispatchers.IO)
+    val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     @OptIn(SupabaseInternal::class)
     val supabaseChannel = client.realtime.channel("channelId") {
         this.broadcast {
@@ -58,21 +60,33 @@ class NotesRepo @Inject constructor(
             filter = FilterOperation("user_id", FilterOperator.EQ, userId)
         )
 
-        Timber.tag("initList").d("Channel Subscribed")
-        supabaseChannel.subscribe()
+        try{
 
-        result.buffer()
-            .collect{
-                Timber.tag("initList").d(it.toString())
-                trySend(it)
-                send(it)
+            Timber.tag("initList").d("Channel Subscribed")
+            supabaseChannel.subscribe()
+
+            result.buffer()
+                .collect{
+                    Timber.tag("initList").d(it.toString())
+                    trySend(it)
+                    send(it)
+                }
+
+            awaitClose {
+                scope.launch{
+                    supabaseChannel.unsubscribe()
+                    Timber.tag("initList").d("Channel UnSubscribed")
+                }
             }
 
-        awaitClose {
+        } catch (e : Exception) {
+            Timber.d(e)
+
             scope.launch{
                 supabaseChannel.unsubscribe()
                 Timber.tag("initList").d("Channel UnSubscribed")
             }
+
         }
 
     }
