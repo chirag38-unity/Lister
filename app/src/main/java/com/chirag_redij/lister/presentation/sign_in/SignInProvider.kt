@@ -1,11 +1,18 @@
 package com.chirag_redij.lister.presentation.sign_in
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ShortcutManager
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
+import com.chirag_redij.lister.MainActivity
+import com.chirag_redij.lister.R
 import com.chirag_redij.lister.SharedPreferenceHelper
 import com.chirag_redij.lister.di.ServiceClient.serviceClient
 import com.chirag_redij.lister.di.SupabaseClient.client
 import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
-import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.gotrue.user.UserSession
@@ -25,6 +32,9 @@ class SignInProvider @Inject constructor(
     private val appContext: Context
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val _actionState = MutableStateFlow<ActionState>(ActionState.Idle)
+    val actionState = _actionState.asStateFlow()
 
     private val _state = MutableStateFlow<UserState>(UserState.Loading)
     val state = _state.asStateFlow()
@@ -62,15 +72,13 @@ class SignInProvider @Inject constructor(
                 is NativeSignInResult.Success -> {
                     saveToken()
                     client.auth.refreshCurrentSession()
-                    val user = client.auth.currentUserOrNull()
-
-
-
                     _state.value = UserState.Success(
                         User(
                             userId = getToken()?.let { client.auth.retrieveUser(it) }
                         )
                     )
+
+                    addDynamicShortCut()
 
                 }
                 is NativeSignInResult.ClosedByUser -> {}
@@ -100,6 +108,9 @@ class SignInProvider @Inject constructor(
                 val token = getToken()
                 if (token.isNullOrEmpty()) {
                     _state.value = UserState.UnAuthenticated
+
+                    removeDynamicShortCut()
+
                 } else {
                     val user = client.auth.retrieveUser(token)
                     client.auth.refreshCurrentSession()
@@ -118,6 +129,9 @@ class SignInProvider @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.tag("Provider").d(e)
+
+                removeDynamicShortCut()
+
                 sharedPref.clearPreferences()
                 _state.value = UserState.Error(e.message)
             }
@@ -129,6 +143,7 @@ class SignInProvider @Inject constructor(
             try {
                 client.auth.signOut()
                 sharedPref.clearPreferences()
+                removeDynamicShortCut()
                 _state.value = UserState.LoggedOut
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -169,6 +184,20 @@ class SignInProvider @Inject constructor(
 
     }
 
+    fun parseViewAction(action: String?) {
+        if (action == Intent.ACTION_VIEW) {
+            Timber.tag("Intent").d("Action set")
+            scope.launch {
+                _actionState.emit(ActionState.Recieved)
+            }
+        } else {
+            Timber.tag("Intent").d("Action reset")
+            scope.launch {
+                _actionState.emit(ActionState.Idle)
+            }
+        }
+    }
+
     // Tokens --------------------------------------------------------------------------------------
 
     private fun saveToken() {
@@ -183,6 +212,29 @@ class SignInProvider @Inject constructor(
         return sharedPref.getStringData("accessToken")
     }
 
+    private fun addDynamicShortCut() {
+        val shortcut = ShortcutInfoCompat.Builder(appContext, "write_shortcut")
+            .setShortLabel("Add Note")
+            .setIcon(IconCompat.createWithResource(appContext, R.drawable.write_shortcut))
+            .setAlwaysBadged()
+            .setIntent(
+                Intent(appContext, MainActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                }
+            )
+            .build()
 
+        ShortcutManagerCompat.pushDynamicShortcut(appContext, shortcut)
+    }
+
+    private fun removeDynamicShortCut() {
+
+        scope.launch {
+            Timber.tag("Intent").d("Action reset")
+            _actionState.emit(ActionState.Idle)
+        }
+
+        ShortcutManagerCompat.removeDynamicShortcuts(appContext, listOf("write_shortcut"))
+    }
 
 }

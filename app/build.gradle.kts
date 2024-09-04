@@ -46,7 +46,7 @@ android {
     defaultConfig {
 //        applicationId = "com.chirag_redij.lister"
         applicationId = "com.mciedusofttech.listerrr"
-        minSdk = 29
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

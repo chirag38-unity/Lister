@@ -1,5 +1,6 @@
 package com.chirag_redij.lister.ui.components
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shortcut
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,7 +76,23 @@ fun ListerTopBar(
                 expanded = isContextMenuVisible,
                 onDismissRequest = { isContextMenuVisible = false }
             ) {
-                for (item in DropDownItem.entries) {
+
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(imageVector = DropDownItem.Shortcut.icon, contentDescription = DropDownItem.Shortcut.title)
+                        },
+                        text = {
+                            Text(text = DropDownItem.Shortcut.title)
+                        },
+                        onClick = {
+                            isContextMenuVisible = false
+                            onLogoutClick(DropDownItem.Shortcut)
+                        }
+                    )
+                }
+
+                for (item in DropDownItem.entries.dropLast(1)) {
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(imageVector = item.icon, contentDescription = item.title)
@@ -101,5 +119,6 @@ fun ListerTopBar(
 
 enum class DropDownItem(val title: String, val icon: ImageVector) {
     DeleteAccount("Delete Account", Icons.Filled.AccountBox),
-    Logout("Logout", Icons.Filled.Logout)
+    Logout("Logout", Icons.Filled.Logout),
+    Shortcut("Pin Shortcut", Icons.Filled.Shortcut)
 }

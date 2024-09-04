@@ -1,5 +1,10 @@
 package com.chirag_redij.lister.ui.screens
 
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -31,7 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.chirag_redij.lister.MainActivity
+import com.chirag_redij.lister.R
+import com.chirag_redij.lister.presentation.sign_in.ActionState
 import com.chirag_redij.lister.presentation.sign_in.UserState
 import com.chirag_redij.lister.ui.components.DropDownItem
 import com.chirag_redij.lister.ui.components.ListItemComposable
@@ -42,7 +51,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import io.github.jan.supabase.gotrue.user.UserInfo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Destination
@@ -54,6 +65,7 @@ fun HomeScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val userState = homeScreenViewModel.userState.collectAsState()
+    val actionState by homeScreenViewModel.actionState.collectAsState()
     val list = homeScreenViewModel.notesList.collectAsState()
 
     var openDialog by remember {
@@ -73,6 +85,52 @@ fun HomeScreen(
     val signOutClick: () -> Unit = {
         coroutineScope.launch {
             homeScreenViewModel.logout()
+        }
+    }
+
+    val addPinnedFunction : () -> Unit = {
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+            val shortcutManager = getSystemService<ShortcutManager>(context, ShortcutManager::class.java)!!
+            if (shortcutManager.isRequestPinShortcutSupported) {
+                val shortcut = ShortcutInfo.Builder(context, "pinned_shortcut")
+                    .setShortLabel("Add Note")
+                    .setIcon(
+                        android.graphics.drawable.Icon.createWithResource(
+                            context,
+                            R.mipmap.short_cut_launcher
+                        )
+                    )
+                    .setIntent(
+                        Intent(context, MainActivity::class.java).apply {
+                            action = Intent.ACTION_VIEW
+                            putExtra("shortcut_id", "pinned")
+                        }
+                    )
+                    .build()
+
+                val callbackIntent = shortcutManager.createShortcutResultIntent(shortcut)
+                val successPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    callbackIntent,
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+                shortcutManager.requestPinShortcut(shortcut, successPendingIntent.intentSender)
+            }
+        }
+
+    }
+
+    LaunchedEffect(actionState) {
+        if ( actionState == ActionState.Recieved ) {
+
+            coroutineScope.launch {
+                openDialog = true
+                Timber.tag("Intent").d("Action shown")
+                delay(500)
+                homeScreenViewModel.acknowledgeAction()
+            }
+
         }
     }
 
@@ -118,6 +176,10 @@ fun HomeScreen(
                     }
                     DropDownItem.Logout -> {
                         signOutClick()
+                    }
+
+                    DropDownItem.Shortcut -> {
+                        addPinnedFunction()
                     }
                 }
             }
