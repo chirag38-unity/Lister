@@ -43,6 +43,11 @@ class NotesRepo @Inject constructor(
             this.receiveOwnBroadcasts = true
             this.acknowledgeBroadcasts = true
         }
+
+//        this.presence {
+//            this.key = "LISTER"
+//        }
+
         build()
     }
 
@@ -57,7 +62,7 @@ class NotesRepo @Inject constructor(
     suspend fun getNotesList(userId: String) : Flow<List<Note>> = callbackFlow {
         val result = supabaseChannel.postgresListDataFlow(
             schema = "public", table = "notes", primaryKey = Note::id,
-            filter = FilterOperation("user_id", FilterOperator.EQ, userId)
+//            filter = FilterOperation("user_id", FilterOperator.EQ, userId)
         )
 
         try{

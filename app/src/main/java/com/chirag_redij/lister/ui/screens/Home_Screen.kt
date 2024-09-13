@@ -177,10 +177,9 @@ fun HomeScreen(
                     DropDownItem.Logout -> {
                         signOutClick()
                     }
-
-                    DropDownItem.Shortcut -> {
-                        addPinnedFunction()
-                    }
+//                    DropDownItem.Shortcut -> {
+//                        addPinnedFunction()
+//                    }
                 }
             }
         },

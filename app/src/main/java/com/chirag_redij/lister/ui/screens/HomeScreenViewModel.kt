@@ -56,6 +56,7 @@ class HomeScreenViewModel @Inject constructor(
     fun deleteNote (
         noteId : String
     ) {
+        Timber.tag("Note").d("Deleting note $noteId")
         notesClient.deleteNote(noteId)
     }
 
@@ -63,6 +64,7 @@ class HomeScreenViewModel @Inject constructor(
         noteId: String,
         status: Boolean
     ) {
+        Timber.tag("Note").d("Updating note $noteId")
         notesClient.updateNote(noteId,status)
     }
 

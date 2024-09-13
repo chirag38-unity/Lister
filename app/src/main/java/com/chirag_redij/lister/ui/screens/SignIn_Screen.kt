@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +58,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
+import io.github.jan.supabase.compose.auth.ui.annotations.AuthUiExperimental
+import io.github.jan.supabase.compose.auth.ui.email.OutlinedEmailField
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Github
 import io.github.jan.supabase.gotrue.providers.builtin.Email
@@ -64,6 +69,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import timber.log.Timber
 
+@OptIn(AuthUiExperimental::class, ExperimentalMaterial3Api::class)
 @RootNavGraph(
     start = true
 )
@@ -102,6 +108,14 @@ fun SignInScreen(
             client.auth.signInWith(Github)
 
         }
+    }
+
+    var userEmail by remember {
+        mutableStateOf("")
+    }
+
+    var userPassword by remember {
+        mutableStateOf("")
     }
 
     // State listeners------------------------------------------------------------------------------
@@ -182,6 +196,41 @@ fun SignInScreen(
                         )
 
                     }
+
+//                    Column (
+//                        modifier = Modifier.fillMaxWidth(),
+//                        verticalArrangement = Arrangement.Center,
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//
+//                        OutlinedEmailField(
+//                            value = userEmail,
+//                            onValueChange = {
+//                                userEmail = it
+//                            }
+//                        )
+//
+//                        OutlinedTextField(
+//                            placeholder = {
+//                                Text("Enter Password")
+//                            },
+//                            value = userPassword,
+//                            onValueChange = {
+//                                userPassword = it
+//                            }
+//                        )
+//
+//                        OutlinedButton(onClick = {
+//                            signInViewModel.signInWithEmailPassword(userEmail, userPassword)
+//                        }) {
+//                            Text(
+//                                text = "Login",
+//                                color = Color.Black
+//                            )
+//                        }
+//
+//                    }
+
                 }
 
 

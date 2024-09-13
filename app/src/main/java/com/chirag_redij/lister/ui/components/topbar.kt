@@ -77,22 +77,22 @@ fun ListerTopBar(
                 onDismissRequest = { isContextMenuVisible = false }
             ) {
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(imageVector = DropDownItem.Shortcut.icon, contentDescription = DropDownItem.Shortcut.title)
-                        },
-                        text = {
-                            Text(text = DropDownItem.Shortcut.title)
-                        },
-                        onClick = {
-                            isContextMenuVisible = false
-                            onLogoutClick(DropDownItem.Shortcut)
-                        }
-                    )
-                }
+//                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+//                    DropdownMenuItem(
+//                        leadingIcon = {
+//                            Icon(imageVector = DropDownItem.Shortcut.icon, contentDescription = DropDownItem.Shortcut.title)
+//                        },
+//                        text = {
+//                            Text(text = DropDownItem.Shortcut.title)
+//                        },
+//                        onClick = {
+//                            isContextMenuVisible = false
+//                            onLogoutClick(DropDownItem.Shortcut)
+//                        }
+//                    )
+//                }
 
-                for (item in DropDownItem.entries.dropLast(1)) {
+                for (item in DropDownItem.entries) {
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(imageVector = item.icon, contentDescription = item.title)
@@ -120,5 +120,5 @@ fun ListerTopBar(
 enum class DropDownItem(val title: String, val icon: ImageVector) {
     DeleteAccount("Delete Account", Icons.Filled.AccountBox),
     Logout("Logout", Icons.Filled.Logout),
-    Shortcut("Pin Shortcut", Icons.Filled.Shortcut)
+//    Shortcut("Pin Shortcut", Icons.Filled.Shortcut)
 }

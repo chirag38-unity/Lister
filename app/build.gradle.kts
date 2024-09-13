@@ -15,7 +15,8 @@ plugins {
 android {
     signingConfigs {
         create("release") {
-            storeFile = file("C:\\Users\\redij\\AndroidStudioProjects\\Lister\\keystore\\Listerrr")
+            storeFile =
+                file("C:\\Users\\redij\\AndroidStudioProjects\\Lister\\keystore\\lister_signing.jks")
             storePassword = "Listerrr@123"
             keyAlias = "key0"
             keyPassword = "Listerrr@123"
@@ -48,8 +49,8 @@ android {
         applicationId = "com.mciedusofttech.listerrr"
         minSdk = 25
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
