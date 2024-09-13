@@ -108,9 +108,9 @@ android {
 dependencies {
 
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
-    implementation("androidx.activity:activity-compose:1.9.1")
-    implementation(platform("androidx.compose:compose-bom:2024.08.00"))
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.5")
+    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation(platform("androidx.compose:compose-bom:2024.09.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -119,7 +119,7 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -128,12 +128,12 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Compose Navigation UI
-    implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.navigation:navigation-ui-ktx:2.8.0")
+    implementation("androidx.navigation:navigation-compose:2.8.0")
 
     // Compose - Destinations
-    implementation("io.github.raamcosta.compose-destinations:core:1.10.0")
-    ksp("io.github.raamcosta.compose-destinations:ksp:1.10.0")
+    implementation("io.github.raamcosta.compose-destinations:core:1.11.6")
+    ksp("io.github.raamcosta.compose-destinations:ksp:1.11.6")
 
     // Firebase Auth & Firestore
 //    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
@@ -147,17 +147,17 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.4.1")
 
     // Supabase
-    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.4")
-    implementation("io.github.jan-tennert.supabase:compose-auth:2.5.4")
-    implementation("io.github.jan-tennert.supabase:compose-auth-ui:2.5.4")
-    implementation("io.github.jan-tennert.supabase:storage-kt:2.5.4")
-    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.4")
-    implementation("io.github.jan-tennert.supabase:realtime-kt:2.5.4")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:compose-auth:2.6.1")
+    implementation("io.github.jan-tennert.supabase:compose-auth-ui:2.6.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.6.1")
     implementation("io.ktor:ktor-client-cio:2.3.12")
 
     // Serialiser
     implementation("com.google.code.gson:gson:2.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
 
     // Dagger-Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")

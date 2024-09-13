@@ -49,7 +49,6 @@ import com.chirag_redij.lister.ui.screens.destinations.HomeScreenDestination
 import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import io.github.jan.supabase.gotrue.user.UserInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -177,9 +176,9 @@ fun HomeScreen(
                     DropDownItem.Logout -> {
                         signOutClick()
                     }
-//                    DropDownItem.Shortcut -> {
-//                        addPinnedFunction()
-//                    }
+                    DropDownItem.Shortcut -> {
+                        addPinnedFunction()
+                    }
                 }
             }
         },

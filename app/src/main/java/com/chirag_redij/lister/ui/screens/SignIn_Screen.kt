@@ -55,7 +55,6 @@ import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
 import io.github.jan.supabase.compose.auth.ui.annotations.AuthUiExperimental
@@ -106,7 +105,6 @@ fun SignInScreen(
     val signInWithGithub : () -> Unit = {
         coroutineScope.launch {
             client.auth.signInWith(Github)
-
         }
     }
 
@@ -178,7 +176,10 @@ fun SignInScreen(
                     progress = { progress }
                 )
 
-                AnimatedVisibility(loadingSessionComplete) {
+                AnimatedVisibility(
+                    loadingSessionComplete,
+                    label = "Load login options"
+                ) {
                     OutlinedButton(onClick = {
                         action.startFlow()
 //                signInWithGithub()
@@ -233,12 +234,11 @@ fun SignInScreen(
 
                 }
 
-
-
             }
 
             AnimatedVisibility(
                 loadingSessionComplete,
+                label = "Load Terms and Conditions and Privacy Policy",
                 modifier = Modifier.fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
