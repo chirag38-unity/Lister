@@ -8,11 +8,13 @@ import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -42,17 +44,21 @@ import com.chirag_redij.lister.MainActivity
 import com.chirag_redij.lister.R
 import com.chirag_redij.lister.presentation.sign_in.ActionState
 import com.chirag_redij.lister.presentation.sign_in.UserState
+import com.chirag_redij.lister.ui.components.CustomTextField
 import com.chirag_redij.lister.ui.components.DropDownItem
 import com.chirag_redij.lister.ui.components.ListItemComposable
 import com.chirag_redij.lister.ui.components.ListerTopBar
+import com.chirag_redij.lister.ui.components.SwipeableListItemComposable
 import com.chirag_redij.lister.ui.screens.destinations.HomeScreenDestination
 import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import io.github.jan.supabase.gotrue.user.UserInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import kotlin.random.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Destination
@@ -65,7 +71,9 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val userState = homeScreenViewModel.userState.collectAsState()
     val actionState by homeScreenViewModel.actionState.collectAsState()
-    val list = homeScreenViewModel.notesList.collectAsState()
+    val list = homeScreenViewModel.notesList
+
+    val randomThreshold = 0.2
 
     var openDialog by remember {
         mutableStateOf(false)
@@ -117,8 +125,34 @@ fun HomeScreen(
                 shortcutManager.requestPinShortcut(shortcut, successPendingIntent.intentSender)
             }
         }
+    }
+
+    val showReviewDialog : () -> Unit = {
+
+        try {
+            val reviewManager = ReviewManagerFactory.create(context)
+            reviewManager.requestReviewFlow().addOnCompleteListener { request ->
+                if (request.isSuccessful) {
+                    reviewManager.launchReviewFlow(context as MainActivity, request.result)
+                }
+            }
+        } catch (e : Exception) {
+            Timber.tag("Review").d(e.toString())
+        }
 
     }
+
+    val maybeTriggerInAppReview : () -> Unit = {
+        // Generate a random number between 0.0 and 1.0
+        val randomValue = Random.nextDouble(0.0, 1.0)
+
+        // Check if random value is less than the threshold
+        if (randomValue < randomThreshold) {
+            showReviewDialog()
+        }
+    }
+
+    LaunchedEffect (true) { maybeTriggerInAppReview() }
 
     LaunchedEffect(actionState) {
         if ( actionState == ActionState.Recieved ) {
@@ -167,9 +201,11 @@ fun HomeScreen(
     // Composable-----------------------------------------------------------------------------------
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             ListerTopBar(userData = userInfo) {
                 when (it) {
+
                     DropDownItem.DeleteAccount -> {
                         deleteAccount()
                     }
@@ -185,14 +221,13 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { openDialog = true },
-                containerColor = Color.Black,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add note")
             }
         }
     ) { scaffoldPadding ->
-
 
         LazyColumn(
             modifier = Modifier
@@ -200,23 +235,38 @@ fun HomeScreen(
                 .padding(scaffoldPadding)
                 .padding(16.dp),
         ) {
-            items(items = list.value, key = { ListItem -> ListItem.id!! }) { ListItem ->
-                ListItemComposable(
+            items(items = list, key = { ListItem -> ListItem.id!! }) { ListItem ->
+
+//                ListItemComposable(
+//                    modifier = Modifier
+//                        .padding(vertical = 8.dp)
+//                        .animateItem(
+//                            fadeInSpec = null, fadeOutSpec = null, placementSpec = tween(durationMillis = 300)
+//                        ),
+//                    listItem = ListItem,
+//                    onDelete = {
+//                        homeScreenViewModel.deleteNote(ListItem.id!!, ListItem)
+//                    },
+//                    onCheckClicked = {
+//                        homeScreenViewModel.updateNote(it.id!!, !it.isDone)
+//                    }
+//                )
+
+                SwipeableListItemComposable(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
-                        .animateItemPlacement(
-                            animationSpec = tween(durationMillis = 300)
-                        )
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                homeScreenViewModel.deleteNote(ListItem.id!!)
-                            },
+                        .animateItem(
+                            fadeInSpec = null, fadeOutSpec = null, placementSpec = tween(durationMillis = 300)
                         ),
-                    listItem = ListItem
-                ) {
-                    homeScreenViewModel.updateNote(it.id!!, !it.isDone)
-                }
+                    listItem = ListItem,
+                    onDelete = {
+                        homeScreenViewModel.deleteNote(ListItem.id!!, ListItem)
+                    },
+                    onCheckClicked = {
+                        homeScreenViewModel.updateNote(it.id!!, !it.isDone)
+                    }
+                )
+
             }
         }
 

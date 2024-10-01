@@ -6,13 +6,19 @@ import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.os.Build
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.chirag_redij.lister.MainActivity
 import com.chirag_redij.lister.R
+import com.chirag_redij.lister.presentation.notes.Note
 import com.chirag_redij.lister.presentation.notes.NotesClient
 import com.chirag_redij.lister.presentation.sign_in.SignInProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -24,7 +30,22 @@ class HomeScreenViewModel @Inject constructor(
 
     val userState = signInProvider.state
     val actionState = signInProvider.actionState
-    val notesList = notesClient.notesList
+
+    private val _notesList = mutableStateListOf<Note>()
+    val notesList : List<Note>
+        get() = _notesList
+
+    init {
+
+        viewModelScope.launch {
+            notesClient.notesList.collectLatest { list ->
+                _notesList.clear().also {
+                    _notesList.addAll(list)
+                }
+            }
+        }
+
+    }
 
     fun logout() {
         notesClient.unsubscribeNotesList()
@@ -54,9 +75,13 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     fun deleteNote (
-        noteId : String
+        noteId : String,
+        note: Note
     ) {
         Timber.tag("Note").d("Deleting note $noteId")
+        viewModelScope.launch {
+            _notesList.remove(note)
+        }
         notesClient.deleteNote(noteId)
     }
 

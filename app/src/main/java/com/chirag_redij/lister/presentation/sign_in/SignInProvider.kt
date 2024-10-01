@@ -78,7 +78,7 @@ class SignInProvider @Inject constructor(
                         )
                     )
 
-//                    addDynamicShortCut()
+                    addDynamicShortCut()
 
                 }
                 is NativeSignInResult.ClosedByUser -> {}

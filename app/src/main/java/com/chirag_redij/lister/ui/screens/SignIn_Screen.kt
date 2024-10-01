@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -58,14 +61,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
 import io.github.jan.supabase.compose.auth.ui.annotations.AuthUiExperimental
-import io.github.jan.supabase.compose.auth.ui.email.OutlinedEmailField
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Github
-import io.github.jan.supabase.gotrue.providers.builtin.Email
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import timber.log.Timber
 
 @OptIn(AuthUiExperimental::class, ExperimentalMaterial3Api::class)
@@ -180,10 +179,12 @@ fun SignInScreen(
                     loadingSessionComplete,
                     label = "Load login options"
                 ) {
-                    OutlinedButton(onClick = {
-                        action.startFlow()
-//                signInWithGithub()
-                    }) {
+                    OutlinedButton(
+                        onClick = {
+                            action.startFlow()
+                        },
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.google),
                             contentDescription = "Google Login",
@@ -193,44 +194,10 @@ fun SignInScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             text = "Login with Google",
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onBackground
                         )
 
                     }
-
-//                    Column (
-//                        modifier = Modifier.fillMaxWidth(),
-//                        verticalArrangement = Arrangement.Center,
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//
-//                        OutlinedEmailField(
-//                            value = userEmail,
-//                            onValueChange = {
-//                                userEmail = it
-//                            }
-//                        )
-//
-//                        OutlinedTextField(
-//                            placeholder = {
-//                                Text("Enter Password")
-//                            },
-//                            value = userPassword,
-//                            onValueChange = {
-//                                userPassword = it
-//                            }
-//                        )
-//
-//                        OutlinedButton(onClick = {
-//                            signInViewModel.signInWithEmailPassword(userEmail, userPassword)
-//                        }) {
-//                            Text(
-//                                text = "Login",
-//                                color = Color.Black
-//                            )
-//                        }
-//
-//                    }
 
                 }
 
@@ -244,17 +211,21 @@ fun SignInScreen(
             ) {
 
                 val annotatedText = buildAnnotatedString {
-                    append("By using Listerrr, you are agreeing to our ")
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)) {
+                        append("By using Listerrr, you are agreeing to our ")
+                    }
 
-                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
                         pushStringAnnotation(tag = "URL", annotation = "https://sites.google.com/view/listerrr/terms-and-conditions")
                         append("Terms of Service")
                         pop()
                     }
 
-                    append(" and ")
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)) {
+                        append(" and ")
+                    }
 
-                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
                         pushStringAnnotation(tag = "URL", annotation = "https://sites.google.com/view/listerrr/privacy-policy")
                         append("Privacy Policy")
                         pop()

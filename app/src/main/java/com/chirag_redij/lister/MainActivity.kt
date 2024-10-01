@@ -1,5 +1,6 @@
 package com.chirag_redij.lister
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,6 +18,13 @@ import com.chirag_redij.lister.di.SupabaseClient
 import com.chirag_redij.lister.presentation.sign_in.SignInProvider
 import com.chirag_redij.lister.ui.screens.NavGraphs
 import com.chirag_redij.lister.ui.theme.ListerTheme
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
+import com.google.android.play.core.ktx.isImmediateUpdateAllowed
+import com.google.android.play.core.ktx.requestUpdateFlow
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.gotrue.handleDeeplinks
@@ -29,6 +37,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var signInProvider: SignInProvider
 
+    private lateinit var appUpdateManager: AppUpdateManager
+    private val updateType = AppUpdateType.IMMEDIATE
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(
@@ -38,6 +49,10 @@ class MainActivity : ComponentActivity() {
                 Color.TRANSPARENT, Color.TRANSPARENT
             )
         )
+
+        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+
+        checkUpdates()
 
         super.onCreate(savedInstanceState)
         Timber.tag("Intent").d("Intent Action -> %s", intent.action)
@@ -66,4 +81,40 @@ class MainActivity : ComponentActivity() {
             insets
         }
     }
+
+    private fun checkUpdates() {
+        appUpdateManager.appUpdateInfo
+            .addOnSuccessListener { info ->
+                val isUpdateAvailable = info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                val isUpdateAllowed = when(updateType) {
+                    AppUpdateType.IMMEDIATE -> info.isImmediateUpdateAllowed
+                    AppUpdateType.FLEXIBLE -> info.isFlexibleUpdateAllowed
+                    else -> false
+                }
+
+                if (isUpdateAvailable && isUpdateAllowed) {
+                    appUpdateManager.startUpdateFlowForResult(
+                        info,
+                        updateType,
+                        this,
+                        123
+                    )
+                }
+
+            }.addOnFailureListener { exception ->
+                Timber.e(exception)
+            }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 123) {
+            if (resultCode != RESULT_OK) {
+                Timber.e("Something went wrong while updating the app")
+            }
+        }
+
+    }
+
 }
