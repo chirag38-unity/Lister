@@ -1,19 +1,13 @@
 package com.chirag_redij.lister.di
 
+import android.app.Application
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
-import com.chirag_redij.lister.presentation.sign_in.GoogleAuthUIClient
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.chirag_redij.lister.presentation.notes.NotesClient
+import com.chirag_redij.lister.presentation.notes.NotesRepo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ActivityContext
-import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.scopes.ActivityScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -23,30 +17,24 @@ import javax.inject.Singleton
 object module {
 
     @Provides
+    @Singleton
+    fun provideApplicationContext(application: Application) : Context {
+        return application.applicationContext
+    }
+
+}
+
+@Module
+@InstallIn(ActivityComponent::class)
+object NotesModule {
+
+    @Provides
     @ActivityScoped
-    @ActivityContext
-    fun provideActivityContext(activity: AppCompatActivity): Context {
-        return activity
+    fun provideNotesClient(notesRepo: NotesRepo): NotesClient {
+        return NotesClient(notesRepo)
     }
 
     @Provides
-    @Singleton
-    fun provideGoogleAuthUIClient(@ApplicationContext context: Context): GoogleAuthUIClient =
-        GoogleAuthUIClient(
-            context = context,
-            oneTapClient = Identity.getSignInClient(context)
-        )
-
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth {
-        return Firebase.auth
-    }
-
-    @Provides
-    @Singleton
-    fun provideFireStore(): FirebaseFirestore {
-        return Firebase.firestore
-    }
-
+    @ActivityScoped
+    fun provideNotesRepo(): NotesRepo = NotesRepo()
 }

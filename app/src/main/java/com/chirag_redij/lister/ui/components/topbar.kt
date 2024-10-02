@@ -1,13 +1,15 @@
 package com.chirag_redij.lister.ui.components
 
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shortcut
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,12 +32,13 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.chirag_redij.lister.R
-import com.google.firebase.auth.FirebaseUser
+import io.github.jan.supabase.gotrue.user.UserInfo
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListerTopBar(
-    userData: FirebaseUser?,
+    userData: UserInfo?,
     onLogoutClick: (DropDownItem) -> Unit
 ) {
 
@@ -43,13 +46,21 @@ fun ListerTopBar(
         mutableStateOf(false)
     }
 
+    Timber.tag("User Metadata").d(userData?.userMetadata.toString())
+    Timber.tag("User Info").d(userData?.toString())
+
+    val userName = userData?.userMetadata?.getValue("name").toString().replace("\"","")
+    val userProfile = userData?.userMetadata?.getValue("avatar_url").toString().replace("\"","")
+
+    Timber.tag("Data").d("%s %s", userName, userProfile)
+
     TopAppBar(
         title = {
-            Text(text = "Hello " + (userData?.displayName ?: "User"))
+            Text(text = "Hello " + (userName ?: "User"))
         },
         actions = {
             AsyncImage(
-                model = userData?.photoUrl ?: R.drawable.person,
+                model = userProfile ?: R.drawable.person,
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(48.dp)
@@ -64,7 +75,23 @@ fun ListerTopBar(
                 expanded = isContextMenuVisible,
                 onDismissRequest = { isContextMenuVisible = false }
             ) {
-                for (item in DropDownItem.entries) {
+
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(imageVector = DropDownItem.Shortcut.icon, contentDescription = DropDownItem.Shortcut.title)
+                        },
+                        text = {
+                            Text(text = DropDownItem.Shortcut.title)
+                        },
+                        onClick = {
+                            isContextMenuVisible = false
+                            onLogoutClick(DropDownItem.Shortcut)
+                        }
+                    )
+                }
+
+                for (item in DropDownItem.entries.dropLast(1)) {
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(imageVector = item.icon, contentDescription = item.title)
@@ -82,14 +109,15 @@ fun ListerTopBar(
             Spacer(modifier = Modifier.width(8.dp))
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            titleContentColor = MaterialTheme.colorScheme.onBackground,
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = Color.Unspecified
         )
     )
 }
 
 enum class DropDownItem(val title: String, val icon: ImageVector) {
-    Settings("Settings", Icons.Filled.Settings),
-    Logout("Logout", Icons.Filled.Logout)
+    DeleteAccount("Delete Account", Icons.Filled.AccountBox),
+    Logout("Logout", Icons.Filled.Logout),
+    Shortcut("Pin Shortcut", Icons.Filled.Shortcut)
 }

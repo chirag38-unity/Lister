@@ -1,12 +1,20 @@
 package com.chirag_redij.lister.ui.screens
 
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.os.Build
 import android.widget.Toast
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -19,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,55 +38,182 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.chirag_redij.lister.presentation.lists.ListItem
-import com.chirag_redij.lister.presentation.lists.ListViewModel
-import com.chirag_redij.lister.presentation.sign_in.SignInViewModel
+import com.chirag_redij.lister.MainActivity
+import com.chirag_redij.lister.R
+import com.chirag_redij.lister.presentation.sign_in.ActionState
+import com.chirag_redij.lister.presentation.sign_in.UserState
+import com.chirag_redij.lister.ui.components.CustomTextField
 import com.chirag_redij.lister.ui.components.DropDownItem
 import com.chirag_redij.lister.ui.components.ListItemComposable
 import com.chirag_redij.lister.ui.components.ListerTopBar
-import com.google.firebase.auth.FirebaseUser
+import com.chirag_redij.lister.ui.components.SwipeableListItemComposable
+import com.chirag_redij.lister.ui.screens.destinations.HomeScreenDestination
+import com.chirag_redij.lister.ui.screens.destinations.SignInScreenDestination
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import io.github.jan.supabase.gotrue.user.UserInfo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import kotlin.random.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Destination
 @Composable
 fun HomeScreen(
     navigator: DestinationsNavigator,
-    userData: FirebaseUser?,
-    signInViewModel: SignInViewModel = hiltViewModel(),
-    listViewModel: ListViewModel = hiltViewModel()
+    homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val list = listViewModel.listState.collectAsState()
+    val userState = homeScreenViewModel.userState.collectAsState()
+    val actionState by homeScreenViewModel.actionState.collectAsState()
+    val list = homeScreenViewModel.notesList
+
+    val randomThreshold = 0.2
+
     var openDialog by remember {
         mutableStateOf(false)
     }
 
-    val signOutClick: () -> Unit = {
+    var userInfo by remember {
+        mutableStateOf<UserInfo?>(null)
+    }
+
+    val deleteAccount : () -> Unit = {
         coroutineScope.launch {
-            signInViewModel.signOut()
-            Toast.makeText(context, "Sign Out Successful", Toast.LENGTH_SHORT).show()
-            navigator.popBackStack()
+            homeScreenViewModel.deleteAccount()
         }
     }
+
+    val signOutClick: () -> Unit = {
+        coroutineScope.launch {
+            homeScreenViewModel.logout()
+        }
+    }
+
+    val addPinnedFunction : () -> Unit = {
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+            val shortcutManager = getSystemService<ShortcutManager>(context, ShortcutManager::class.java)!!
+            if (shortcutManager.isRequestPinShortcutSupported) {
+                val shortcut = ShortcutInfo.Builder(context, "pinned_shortcut")
+                    .setShortLabel("Add Note")
+                    .setIcon(
+                        android.graphics.drawable.Icon.createWithResource(
+                            context,
+                            R.mipmap.short_cut_launcher
+                        )
+                    )
+                    .setIntent(
+                        Intent(context, MainActivity::class.java).apply {
+                            action = Intent.ACTION_VIEW
+                            putExtra("shortcut_id", "pinned")
+                        }
+                    )
+                    .build()
+
+                val callbackIntent = shortcutManager.createShortcutResultIntent(shortcut)
+                val successPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    callbackIntent,
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+                shortcutManager.requestPinShortcut(shortcut, successPendingIntent.intentSender)
+            }
+        }
+    }
+
+    val showReviewDialog : () -> Unit = {
+
+        try {
+            val reviewManager = ReviewManagerFactory.create(context)
+            reviewManager.requestReviewFlow().addOnCompleteListener { request ->
+                if (request.isSuccessful) {
+                    reviewManager.launchReviewFlow(context as MainActivity, request.result)
+                }
+            }
+        } catch (e : Exception) {
+            Timber.tag("Review").d(e.toString())
+        }
+
+    }
+
+    val maybeTriggerInAppReview : () -> Unit = {
+        // Generate a random number between 0.0 and 1.0
+        val randomValue = Random.nextDouble(0.0, 1.0)
+
+        // Check if random value is less than the threshold
+        if (randomValue < randomThreshold) {
+            showReviewDialog()
+        }
+    }
+
+    LaunchedEffect (true) { maybeTriggerInAppReview() }
+
+    LaunchedEffect(actionState) {
+        if ( actionState == ActionState.Recieved ) {
+
+            coroutineScope.launch {
+                openDialog = true
+                Timber.tag("Intent").d("Action shown")
+                delay(500)
+                homeScreenViewModel.acknowledgeAction()
+            }
+
+        }
+    }
+
+    LaunchedEffect(key1 = userState.value) {
+        when (userState.value) {
+            is UserState.Error -> {
+//                Toast.makeText(context, (userState as UserState.Error).message, Toast.LENGTH_SHORT).show()
+            }
+            UserState.LoggedOut -> {
+                Toast.makeText(context, "Sign Out Successful", Toast.LENGTH_SHORT).show()
+                navigator.navigate(SignInScreenDestination){
+                    popUpTo(HomeScreenDestination){
+                        inclusive = true
+                    }
+                }
+            }
+            UserState.AccountDeleted -> {
+                Toast.makeText(context, "Account Deleted Successfully", Toast.LENGTH_SHORT).show()
+                navigator.navigate(SignInScreenDestination){
+                    popUpTo(HomeScreenDestination){
+                        inclusive = true
+                    }
+                }
+            }
+            is UserState.Success -> {
+                userInfo = (userState.value as UserState.Success).user.userId
+                homeScreenViewModel.subscribeNotesList(userInfo?.id)
+            }
+            else -> {}
+        }
+    }
+
+
 
     // Composable-----------------------------------------------------------------------------------
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
-            ListerTopBar(userData = userData) {
+            ListerTopBar(userData = userInfo) {
                 when (it) {
-                    DropDownItem.Settings -> {
-                        Toast.makeText(context, "Settings Button Clicked", Toast.LENGTH_SHORT)
-                            .show()
-                    }
 
+                    DropDownItem.DeleteAccount -> {
+                        deleteAccount()
+                    }
                     DropDownItem.Logout -> {
                         signOutClick()
+                    }
+                    DropDownItem.Shortcut -> {
+                        addPinnedFunction()
                     }
                 }
             }
@@ -85,14 +221,13 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { openDialog = true },
-                containerColor = Color.Yellow,
-                contentColor = MaterialTheme.colorScheme.onBackground
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add note")
             }
         }
     ) { scaffoldPadding ->
-
 
         LazyColumn(
             modifier = Modifier
@@ -100,20 +235,38 @@ fun HomeScreen(
                 .padding(scaffoldPadding)
                 .padding(16.dp),
         ) {
-            items(list.value) { ListItem ->
-                ListItemComposable(
+            items(items = list, key = { ListItem -> ListItem.id!! }) { ListItem ->
+
+//                ListItemComposable(
+//                    modifier = Modifier
+//                        .padding(vertical = 8.dp)
+//                        .animateItem(
+//                            fadeInSpec = null, fadeOutSpec = null, placementSpec = tween(durationMillis = 300)
+//                        ),
+//                    listItem = ListItem,
+//                    onDelete = {
+//                        homeScreenViewModel.deleteNote(ListItem.id!!, ListItem)
+//                    },
+//                    onCheckClicked = {
+//                        homeScreenViewModel.updateNote(it.id!!, !it.isDone)
+//                    }
+//                )
+
+                SwipeableListItemComposable(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                listViewModel.deleteItem(ListItem)
-                            },
+                        .animateItem(
+                            fadeInSpec = null, fadeOutSpec = null, placementSpec = tween(durationMillis = 300)
                         ),
-                    listItem = ListItem
-                ) {
-                    listViewModel.toggleItemState(it)
-                }
+                    listItem = ListItem,
+                    onDelete = {
+                        homeScreenViewModel.deleteNote(ListItem.id!!, ListItem)
+                    },
+                    onCheckClicked = {
+                        homeScreenViewModel.updateNote(it.id!!, !it.isDone)
+                    }
+                )
+
             }
         }
 
@@ -132,10 +285,9 @@ fun HomeScreen(
                         if (note.isEmpty()) {
                             isError = true
                         } else {
-                            listViewModel.addNewItem(
-                                ListItem(
-                                    title = note
-                                )
+                            homeScreenViewModel.addNote(
+                                title = note,
+                                userId = userInfo?.id ?: ""
                             )
                             openDialog = false
                         }
