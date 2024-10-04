@@ -214,7 +214,7 @@ class SignInProvider @Inject constructor(
 
     private fun addDynamicShortCut() {
         val shortcut = ShortcutInfoCompat.Builder(appContext, "write_shortcut")
-            .setShortLabel("Add Note")
+            .setShortLabel(appContext.getString(R.string.add_note))
             .setIcon(IconCompat.createWithResource(appContext, R.drawable.write_shortcut))
             .setAlwaysBadged()
             .setIntent(

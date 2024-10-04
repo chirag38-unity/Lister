@@ -8,13 +8,10 @@ import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -35,8 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,9 +41,7 @@ import com.chirag_redij.lister.MainActivity
 import com.chirag_redij.lister.R
 import com.chirag_redij.lister.presentation.sign_in.ActionState
 import com.chirag_redij.lister.presentation.sign_in.UserState
-import com.chirag_redij.lister.ui.components.CustomTextField
 import com.chirag_redij.lister.ui.components.DropDownItem
-import com.chirag_redij.lister.ui.components.ListItemComposable
 import com.chirag_redij.lister.ui.components.ListerTopBar
 import com.chirag_redij.lister.ui.components.SwipeableListItemComposable
 import com.chirag_redij.lister.ui.screens.destinations.HomeScreenDestination
@@ -60,7 +55,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.random.Random
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Destination
 @Composable
 fun HomeScreen(
@@ -100,7 +94,7 @@ fun HomeScreen(
             val shortcutManager = getSystemService<ShortcutManager>(context, ShortcutManager::class.java)!!
             if (shortcutManager.isRequestPinShortcutSupported) {
                 val shortcut = ShortcutInfo.Builder(context, "pinned_shortcut")
-                    .setShortLabel("Add Note")
+                    .setShortLabel(context.getString(R.string.add_note))
                     .setIcon(
                         android.graphics.drawable.Icon.createWithResource(
                             context,
@@ -173,7 +167,8 @@ fun HomeScreen(
 //                Toast.makeText(context, (userState as UserState.Error).message, Toast.LENGTH_SHORT).show()
             }
             UserState.LoggedOut -> {
-                Toast.makeText(context, "Sign Out Successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.sign_out_successful), Toast.LENGTH_SHORT).show()
                 navigator.navigate(SignInScreenDestination){
                     popUpTo(HomeScreenDestination){
                         inclusive = true
@@ -181,7 +176,8 @@ fun HomeScreen(
                 }
             }
             UserState.AccountDeleted -> {
-                Toast.makeText(context, "Account Deleted Successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.account_deleted_successfully), Toast.LENGTH_SHORT).show()
                 navigator.navigate(SignInScreenDestination){
                     popUpTo(HomeScreenDestination){
                         inclusive = true
@@ -224,7 +220,7 @@ fun HomeScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add note")
+                Icon(imageVector = Icons.Filled.Add, contentDescription = stringResource(R.string.add_note))
             }
         }
     ) { scaffoldPadding ->
@@ -256,7 +252,9 @@ fun HomeScreen(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
                         .animateItem(
-                            fadeInSpec = null, fadeOutSpec = null, placementSpec = tween(durationMillis = 300)
+                            fadeInSpec = null,
+                            fadeOutSpec = null,
+                            placementSpec = tween(durationMillis = 300)
                         ),
                     listItem = ListItem,
                     onDelete = {
@@ -292,17 +290,17 @@ fun HomeScreen(
                             openDialog = false
                         }
                     }) {
-                        Text(text = "Add Note")
+                        Text(text = stringResource(R.string.add_note))
                     }
                 },
                 title = {
-                    Text(text = "Add a new note")
+                    Text(text = stringResource(R.string.add_a_new_note))
                 },
                 text = {
                     TextField(
                         value = note,
                         placeholder = {
-                            Text(text = "Write a new note")
+                            Text(text = stringResource(R.string.write_a_new_note))
                         },
                         onValueChange = {
                             note = it

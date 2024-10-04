@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="login_with_google">تسجيل الدخول مع جوجل</string>
+    <string name="load_terms_and_conditions_and_privacy_policy">تحميل الشروط والأحكام وسياسة الخصوصية</string>
+    <string name="by_using_listerrr_you_are_agreeing_to_our">باستخدام Listerrr، أنت توافق على</string>
+    <string name="terms_of_service">شروط الخدمة</string>
+    <string name="and">و</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="hello">"مرحبًا "</string>
+    <string name="delete_account">حذف الحساب</string>
+    <string name="logout">تسجيل الخروج</string>
+    <string name="pin_shortcut">اختصار الدبوس</string>
+    <string name="add_note">أضف ملاحظة</string>
+    <string name="add_a_new_note">أضف ملاحظة جديدة</string>
+    <string name="write_a_new_note">اكتب ملاحظة جديدة</string>
+    <string name="sign_out_successful">تم تسجيل الخروج بنجاح</string>
+    <string name="account_deleted_successfully">تم حذف الحساب بنجاح</string>
+    <string name="sign_in_successful">تم تسجيل الدخول بنجاح</string>
+
+</resources>

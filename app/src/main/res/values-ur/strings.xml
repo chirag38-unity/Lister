@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_with_google">گوگل کے ساتھ لاگ ان کریں۔</string>
+    <string name="load_terms_and_conditions_and_privacy_policy">لوڈ شرائط و ضوابط اور رازداری کی پالیسی</string>
+    <string name="by_using_listerrr_you_are_agreeing_to_our">Listerrr استعمال کرکے، آپ ہماری بات سے اتفاق کر رہے ہیں۔ </string>
+    <string name="terms_of_service">سروس کی شرائط</string>
+    <string name="and"> اور </string>
+    <string name="privacy_policy">رازداری کی پالیسی</string>
+    <string name="hello">ہیلو </string>
+    <string name="delete_account">اکاؤنٹ حذف کریں۔</string>
+    <string name="logout">لاگ آؤٹ</string>
+    <string name="pin_shortcut">پن شارٹ کٹ</string>
+    <string name="add_note">نوٹ شامل کریں۔</string>
+    <string name="add_a_new_note">ایک نیا نوٹ شامل کریں۔</string>
+    <string name="write_a_new_note">ایک نیا نوٹ لکھیں۔</string>
+    <string name="sign_out_successful">سائن آؤٹ کامیاب</string>
+    <string name="account_deleted_successfully">اکاؤنٹ کامیابی سے حذف ہو گیا۔</string>
+    <string name="sign_in_successful">سائن ان کامیاب</string>
+</resources>

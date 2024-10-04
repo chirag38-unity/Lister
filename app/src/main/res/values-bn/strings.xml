@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="login_with_google">গুগল দিয়ে লগইন করুন</string>
+    <string name="load_terms_and_conditions_and_privacy_policy">লোড শর্তাবলী এবং গোপনীয়তা নীতি</string>
+    <string name="by_using_listerrr_you_are_agreeing_to_our">Listerrr ব্যবহার করে, আপনি আমাদের সাথে সম্মত হচ্ছেন </string>
+    <string name="terms_of_service">পরিষেবার শর্তাবলী</string>
+    <string name="and"> এবং </string>
+    <string name="privacy_policy">গোপনীয়তা নীতি</string>
+    <string name="hello">হ্যালো </string>
+    <string name="delete_account">অ্যাকাউন্ট মুছুন</string>
+    <string name="logout">লগআউট</string>
+    <string name="pin_shortcut">পিন শর্টকাট</string>
+    <string name="add_note">নোট যোগ করুন</string>
+    <string name="add_a_new_note">একটি নতুন নোট যোগ করুন</string>
+    <string name="write_a_new_note">একটি নতুন নোট লিখুন</string>
+    <string name="sign_out_successful">সাইন আউট সফল</string>
+    <string name="account_deleted_successfully">অ্যাকাউন্ট সফলভাবে মুছে ফেলা হয়েছে</string>
+    <string name="sign_in_successful">সাইন ইন সফল</string>
+
+</resources>

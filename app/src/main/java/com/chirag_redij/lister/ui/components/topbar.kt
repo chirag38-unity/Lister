@@ -1,5 +1,6 @@
 package com.chirag_redij.lister.ui.components
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Shortcut
@@ -28,6 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -41,6 +46,8 @@ fun ListerTopBar(
     userData: UserInfo?,
     onLogoutClick: (DropDownItem) -> Unit
 ) {
+
+    val context = LocalContext.current
 
     var isContextMenuVisible by rememberSaveable {
         mutableStateOf(false)
@@ -56,7 +63,11 @@ fun ListerTopBar(
 
     TopAppBar(
         title = {
-            Text(text = "Hello " + (userName ?: "User"))
+            Text(text = buildString {
+                append(stringResource(R.string.hello))
+                append(" ")
+                append((userName ?: "User"))
+            })
         },
         actions = {
             AsyncImage(
@@ -79,10 +90,10 @@ fun ListerTopBar(
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
                     DropdownMenuItem(
                         leadingIcon = {
-                            Icon(imageVector = DropDownItem.Shortcut.icon, contentDescription = DropDownItem.Shortcut.title)
+                            Icon(imageVector = DropDownItem.Shortcut.icon, contentDescription = DropDownItem.Shortcut.getTitle(context))
                         },
                         text = {
-                            Text(text = DropDownItem.Shortcut.title)
+                            Text(text = DropDownItem.Shortcut.getTitle(context))
                         },
                         onClick = {
                             isContextMenuVisible = false
@@ -94,10 +105,10 @@ fun ListerTopBar(
                 for (item in DropDownItem.entries.dropLast(1)) {
                     DropdownMenuItem(
                         leadingIcon = {
-                            Icon(imageVector = item.icon, contentDescription = item.title)
+                            Icon(imageVector = item.icon, contentDescription = item.getTitle(context))
                         },
                         text = {
-                            Text(text = item.title)
+                            Text(text = item.getTitle(context))
                         },
                         onClick = {
                             isContextMenuVisible = false
@@ -116,8 +127,22 @@ fun ListerTopBar(
     )
 }
 
-enum class DropDownItem(val title: String, val icon: ImageVector) {
-    DeleteAccount("Delete Account", Icons.Filled.AccountBox),
-    Logout("Logout", Icons.Filled.Logout),
-    Shortcut("Pin Shortcut", Icons.Filled.Shortcut)
+//enum class DropDownItem(val title: String, val icon: ImageVector) {
+//    DeleteAccount(context.getString(R.string.delete_account), Icons.Filled.AccountBox),
+//    Logout(context.getString(R.string.logout), Icons.Filled.Logout),
+//    Shortcut(context.getString(R.string.pin_shortcut), Icons.Filled.Shortcut)
+//}
+
+enum class DropDownItem(val icon: ImageVector) {
+    DeleteAccount(Icons.Filled.AccountBox),
+    Logout(Icons.AutoMirrored.Filled.Logout),
+    Shortcut(Icons.AutoMirrored.Filled.Shortcut);
+
+    fun getTitle(context: Context): String {
+        return when (this) {
+            DeleteAccount -> context.getString(R.string.delete_account)
+            Logout -> context.getString(R.string.logout) // You may define a resource for this as well
+            Shortcut -> context.getString(R.string.pin_shortcut) // You may define a resource for this as well
+        }
+    }
 }

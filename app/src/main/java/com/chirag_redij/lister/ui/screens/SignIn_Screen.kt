@@ -15,15 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
@@ -60,14 +57,12 @@ import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
-import io.github.jan.supabase.compose.auth.ui.annotations.AuthUiExperimental
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Github
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-@OptIn(AuthUiExperimental::class, ExperimentalMaterial3Api::class)
 @RootNavGraph(
     start = true
 )
@@ -125,32 +120,21 @@ fun SignInScreen(
                 signInViewModel.resetUserState()
             }
             is UserState.Success -> {
-                Toast.makeText(context, "Sign In Successful", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,
+                    context.getString(R.string.sign_in_successful), Toast.LENGTH_SHORT).show()
                 navigator.navigate(HomeScreenDestination){
                     popUpTo(SignInScreenDestination){
                         inclusive = true
                     }
                 }
             }
-            is UserState.UnAuthenticated -> {
+            UserState.Loading -> {}
+            else -> {
                 scope.launch {
                     delay(1000)
                     loadingSessionComplete = true
                 }
             }
-            UserState.LoggedOut -> {
-                scope.launch {
-                    delay(1000)
-                    loadingSessionComplete = true
-                }
-            }
-            UserState.AccountDeleted -> {
-                scope.launch {
-                    delay(1000)
-                    loadingSessionComplete = true
-                }
-            }
-            else -> {}
         }
     }
 
@@ -159,7 +143,8 @@ fun SignInScreen(
 
     ) { scaffoldPadding ->
 
-        Box(modifier = Modifier.fillMaxSize()
+        Box(modifier = Modifier
+            .fillMaxSize()
             .padding(scaffoldPadding)) {
 
             Column(
@@ -193,7 +178,7 @@ fun SignInScreen(
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
-                            text = "Login with Google",
+                            text = stringResource(R.string.login_with_google),
                             color = MaterialTheme.colorScheme.onBackground
                         )
 
@@ -205,36 +190,41 @@ fun SignInScreen(
 
             AnimatedVisibility(
                 loadingSessionComplete,
-                label = "Load Terms and Conditions and Privacy Policy",
-                modifier = Modifier.fillMaxWidth()
+                label = stringResource(R.string.load_terms_and_conditions_and_privacy_policy),
+                modifier = Modifier
+                    .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
 
                 val annotatedText = buildAnnotatedString {
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)) {
-                        append("By using Listerrr, you are agreeing to our ")
+                        append(stringResource(R.string.by_using_listerrr_you_are_agreeing_to_our))
+                        append(" ")
                     }
 
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
                         pushStringAnnotation(tag = "URL", annotation = "https://sites.google.com/view/listerrr/terms-and-conditions")
-                        append("Terms of Service")
+                        append(stringResource(R.string.terms_of_service))
                         pop()
                     }
 
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp)) {
-                        append(" and ")
+                        append(" ")
+                        append(stringResource(R.string.and))
+                        append(" ")
                     }
 
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary, fontSize = 12.sp, textDecoration = TextDecoration.Underline)) {
                         pushStringAnnotation(tag = "URL", annotation = "https://sites.google.com/view/listerrr/privacy-policy")
-                        append("Privacy Policy")
+                        append(stringResource(R.string.privacy_policy))
                         pop()
                     }
                 }
 
                 ClickableText(
                     text = annotatedText,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .padding(20.dp),
                     softWrap = true,
                     overflow = TextOverflow.Visible,

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_with_google">Connectez-vous avec Google</string>
+    <string name="load_terms_and_conditions_and_privacy_policy">Charger les conditions générales et la politique de confidentialité</string>
+    <string name="by_using_listerrr_you_are_agreeing_to_our">En utilisant Listerrr, vous acceptez notre </string>
+    <string name="terms_of_service">Conditions d\'utilisation</string>
+    <string name="and"> et </string>
+    <string name="privacy_policy">politique de confidentialité</string>
+    <string name="hello">Bonjour </string>
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="logout">Déconnexion</string>
+    <string name="pin_shortcut">Raccourci d’épingle</string>
+    <string name="add_note">Ajouter une note</string>
+    <string name="add_a_new_note">Ajouter une nouvelle note</string>
+    <string name="write_a_new_note">Écrivez une nouvelle note</string>
+    <string name="sign_out_successful">Déconnexion réussie</string>
+    <string name="account_deleted_successfully">Compte supprimé avec succès</string>
+    <string name="sign_in_successful">Connexion réussie</string>
+</resources>

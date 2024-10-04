@@ -1,4 +1,20 @@
 <resources>
-    <string name="app_name">Listerrr</string>
-    <string name="web_client_id">741962015263-5mugg2rmhliv5tfnufcb1cbinvhnbnad.apps.googleusercontent.com</string>
+    <string name="app_name" translatable="false">Listerrr</string>
+    <string name="web_client_id" translatable="false">741962015263-5mugg2rmhliv5tfnufcb1cbinvhnbnad.apps.googleusercontent.com</string>
+    <string name="login_with_google">Login with Google</string>
+    <string name="load_terms_and_conditions_and_privacy_policy">Load Terms and Conditions and Privacy Policy</string>
+    <string name="by_using_listerrr_you_are_agreeing_to_our">By using Listerrr, you are agreeing to our </string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="and"> and </string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="hello">Hello </string>
+    <string name="delete_account">Delete Account</string>
+    <string name="logout">Logout</string>
+    <string name="pin_shortcut">Pin Shortcut</string>
+    <string name="add_note">Add note</string>
+    <string name="add_a_new_note">Add a new note</string>
+    <string name="write_a_new_note">Write a new note</string>
+    <string name="sign_out_successful">Sign Out Successful</string>
+    <string name="account_deleted_successfully">Account Deleted Successfully</string>
+    <string name="sign_in_successful">Sign In Successful</string>
 </resources>
